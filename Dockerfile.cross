@@ -1,16 +1,17 @@
-FROM __BASEIMAGE_ARCH__/alpine
+FROM __BASEIMAGE_ARCH__/alpine:3.15
 MAINTAINER Jonathan Weisberg <jo.weisberg@gmail.com>
 
-# Git source https://github.com/jazzdd86/phpVirtualbox.git
+# Git source https://github.com/phpvirtualbox/phpvirtualbox.git
 __CROSS_COPY qemu-__QEMU_ARCH__-static /usr/bin
-RUN apk --no-cache --update add bash tzdata nginx php7-fpm php7-cli php7-common php7-json php7-soap php7-simplexml php7-session \
+RUN apk update && apk upgrade
+RUN apk --no-cache --update add bash tzdata nginx php8-fpm php8-cli php8-common php8-json php8-soap php8-simplexml php8-session \
     && apk --no-cache --update add --virtual build-dependencies wget unzip \
-    && wget --no-check-certificate https://github.com/phpvirtualbox/phpvirtualbox/archive/develop.zip -O phpvirtualbox.zip \
+    && wget --no-check-certificate https://github.com/phpvirtualbox/phpvirtualbox/archive/master.zip -O phpvirtualbox.zip \
     && unzip phpvirtualbox.zip -d phpvirtualbox \
     && mkdir -p /var/www \
     && mv -v phpvirtualbox/*/* /var/www/ \
     && rm phpvirtualbox.zip \
-    && rm phpvirtualbox/ -R \
+    && rm -Rf phpvirtualbox/ \
     && apk del build-dependencies \
     && echo "<?php return array(); ?>" > /var/www/config-servers.php \
     && echo "<?php return array(); ?>" > /var/www/config-override.php \
@@ -26,4 +27,4 @@ COPY servers-from-env.php /servers-from-env.php
 EXPOSE 80
 
 # write linked instances to config, then monitor all services
-CMD php7 /servers-from-env.php && php-fpm7 && nginx
+CMD php8 /servers-from-env.php && php-fpm8 && nginx
